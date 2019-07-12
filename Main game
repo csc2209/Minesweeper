@@ -1,0 +1,711 @@
+def create_board(width,height, thing):
+    width_li = []
+    whole_board = []
+    for i in range(0,width):
+        width_li.append(thing)
+    for i in range(0,height):
+        whole_board.append(width_li[:])
+    return(whole_board)
+    
+def bury_mines(gameboard, n):
+    i = 0
+    while i < n:
+        rand_x = random.randrange(0,len(gameboard[0]))
+        rand_y = random.randrange(0,len(gameboard))
+        if gameboard[rand_y][rand_x] == '.':
+            i += 1
+            gameboard[rand_y][rand_x] = '*'
+            
+def get_mine_count(gameboard,x,y):
+    counter = 0
+    width = len(gameboard[0])
+    height = len(gameboard)
+    if gameboard[y][x] == '.':
+        if y > 0 and x > 0 and gameboard[y-1][x-1] == '*':
+            counter += 1
+        if y > 0 and gameboard[y-1][x] == '*':
+            counter += 1
+        if x + 1 < width and y > 0 and gameboard[y-1][x+1] == '*':
+            counter += 1
+        if x > 0 and gameboard[y][x-1] == '*':
+            counter += 1
+        if x + 1 < width and gameboard[y][x+1] == '*':
+            counter += 1
+        if y + 1 < height and x > 0 and gameboard[y+1][x-1] == '*':
+            counter += 1
+        if y + 1 < height and gameboard[y+1][x] == '*':
+            counter += 1
+        if y + 1 < height and x + 1 < width and gameboard[y+1][x+1] == '*':
+            counter += 1
+        return(counter)
+    else:
+        return(-1)
+        
+def print_mines(gameboard):
+    for i in range(len(gameboard)):
+        current_string = ''
+        for j in range(len(gameboard[i])):
+            current_string = current_string + str(gameboard[i][j]) + '   '
+        print(current_string)
+        
+def print_board(gameboard):
+    for y in range(len(gameboard)):
+        for x in range(len(gameboard[y])):
+            c = get_mine_count(g,x,y)
+            completed_board[y][x] = c
+    
+        
+def user_view(gameboard):
+    current_string = '   '
+    for i in range(len(gameboard[0])):
+        if i < 9:
+            current_string += ' ' + str(i + 1) + '  '
+        else:
+            current_string += str(i + 1) + '  '
+    print(current_string)
+    current_string = '  -'
+    for i in range(len(gameboard[0])):
+        current_string += '----'
+    print(current_string)
+    for i in range(len(gameboard)):
+        if i < 9:
+            current_string = ' ' + str(i+1) + '| '
+        else:
+            current_string = str(i + 1) + '| '
+        for j in range(len(gameboard[i])):
+            current_string = current_string + str(gameboard[i][j]) + ' | '
+        current_string += str(i + 1)
+        print(current_string)
+        current_string = '  -'
+        for i in range(len(gameboard[0])):
+            current_string += '----'
+        print(current_string)
+    current_string = '   '
+    for i in range(len(gameboard[0])):
+        if i < 9:
+            current_string += ' ' + str(i + 1) + '  '
+        else:
+            current_string += str(i + 1) + '  '
+    print(current_string)
+         
+def uncover_board(gameboard,x,y,mark,start_time,won):    
+    u = None
+    if zeroes == []:
+        no_zeroes = True
+    else:
+        no_zeroes = False
+    width = len(gameboard[0])
+    height = len(gameboard)
+    if mark == True:
+        if user_board[y][x] == '▶':
+            user_board[y][x] = ' '
+        elif user_board[y][x] == ' ' and mines_left(n,user_board) < 0:
+            print('No mines left to place. Try again.')
+            coordinate = check_coordinates()
+            x,y,mark = (int(coordinate[0]) - 1 ,int(coordinate[1]) - 1,coordinate[2]) 
+            u = uncover_board(user_board,x,y,mark,start_time,won)
+        elif user_board[y][x] == ' ' and mines_left(n,user_board) > 0:
+            user_board[y][x] = '▶'
+        mark = False
+        if check_won(user_board,n) == True:
+            u = uncover_board(user_board,x,y,mark,start_time,won)
+            return(True)
+        else:
+            num_mines_left = mines_left(n,user_board)
+            elapsed_time = time.time() - start_time
+            elapsed_time = sec_to_ms(elapsed_time)
+            print(('+' + '-' * (8 + len(str(elapsed_time)))) + '+' + ' ' * ((4 * len(user_board[0])) - 16 - len(str(elapsed_time)) - len(str(num_mines_left))) + '+' + '-' * (9 + len(str(num_mines_left))) + '+') 
+            print('| Time: ' + str(elapsed_time) + ' |'+' ' * ((4 * len(user_board[0])) - 16 - len(str(elapsed_time)) - len(str(num_mines_left))) + '| Mines: ' + str(num_mines_left) + ' |')
+            print(('+' + '-' * (8 + len(str(elapsed_time)))) + '+' + ' ' * ((4 * len(user_board[0])) - 16 - len(str(elapsed_time)) - len(str(num_mines_left))) + '+' + '-' * (9 + len(str(num_mines_left))) + '+') 
+            #print('\n')
+            user_view(user_board)
+            coordinate = check_coordinates()
+            x,y,mark = (int(coordinate[0]) - 1 ,int(coordinate[1]) - 1,coordinate[2]) 
+            u = uncover_board(user_board,x,y,mark,start_time,won)
+    if u == True or u == False:
+        return(True)
+    if user_board[y][x] != ' ' and no_zeroes == True and check_won(user_board,n) == False:
+        elapsed_time = time.time() - start_time
+        elapsed_time = sec_to_ms(elapsed_time)     
+        print(('+' + '-' * (8 + len(str(elapsed_time)))) + '+')
+        print('| Time: ' + str(elapsed_time) + ' |')
+        print(('+' + '-' * (8 + len(str(elapsed_time)))) + '+')
+        coordinate = check_coordinates()
+        print('\n')
+        x,y,mark = (int(coordinate[0]) - 1 ,int(coordinate[1]) - 1,coordinate[2])
+        u = uncover_board(user_board,x,y,mark,start_time,won)
+        return(True)
+    elif completed_board[y][x] == -1 and check_won(user_board,n) == False:
+        print('')
+        user_view(g)
+        print('\n' + '+' + '-' * 13 + '+' + '\n| You lost!!! |\n' + '+' + \
+        '-' * 13 + '+\n| Play again! |\n+' + '-' * 13 + '+')
+        return(False)
+    elif completed_board[y][x] >= 1:
+        user_board[y][x] = completed_board[y][x]
+    elif completed_board[y][x] == 0:
+        user_board[y][x] = completed_board[y][x]
+        previous_zeroes.append((y,x))
+        if y > 0 and completed_board[y-1][x] != -1 and user_board[y-1][x] != '▶':
+            user_board[y-1][x] = completed_board[y-1][x]
+            if completed_board[y-1][x] == 0:
+                zeroes.append((y-1,x))
+        if y < height - 1 and completed_board[y+1][x] != -1 and user_board[y+1][x] != '▶':
+            user_board[y+1][x] = completed_board[y+1][x]
+            if completed_board[y+1][x] == 0:
+                zeroes.append((y+1,x))
+        if x > 0 and completed_board[y][x-1] != -1 and user_board[y][x-1] != '▶':
+            user_board[y][x-1] = completed_board[y][x-1]
+            if completed_board[y][x-1] == 0:
+                zeroes.append((y,x-1))
+        if x < width - 1 and completed_board[y][x+1] != -1 and user_board[y][x+1] != '▶':
+            user_board[y][x+1] = completed_board[y][x+1]
+            if completed_board[y][x+1] == 0:
+                zeroes.append((y,x+1))
+        if y > 0 and x > 0 and completed_board[y-1][x-1] != -1 and user_board[y-1][x-1] != '▶':
+            user_board[y-1][x-1] = completed_board[y-1][x-1]
+            if completed_board[y-1][x-1] == 0:
+                zeroes.append((y-1,x-1))
+        if x < width - 1 and y > 0 and completed_board[y-1][x+1] != -1 and user_board[y-1][x+1] != '▶':
+            user_board[y-1][x+1] = completed_board[y-1][x+1]
+            if completed_board[y-1][x+1] == 0:
+                zeroes.append((y-1,x+1))
+        if y < height - 1 and x > 0 and completed_board[y+1][x-1] != -1 and user_board[y+1][x-1] != '▶':
+            user_board[y+1][x-1] = completed_board[y+1][x-1]
+            if completed_board[y+1][x-1] == 0:
+                zeroes.append((y+1,x-1))
+        if y < height - 1 and x < width - 1 and completed_board[y+1][x+1] != -1 and user_board[y+1][x+1] != '▶':
+            user_board[y+1][x+1]  = completed_board[y+1][x+1]
+            if completed_board[y+1][x+1] == 0:
+                zeroes.append((y+1,x+1))
+        if no_zeroes == False:
+            zeroes.remove(zeroes[0])
+        for i in previous_zeroes:
+            for j in zeroes:  
+                if i == j:
+                    zeroes.remove(j)        
+    if check_won(user_board,n) == True:
+        won = True
+        user_view(g)
+        print('\n' + '+' + '-' * 12 + '+' + '\n| You won!!! |\n' + '+' + '-' * 12 + '+\n| Play again |\n+' + '-' * 12 + '+')
+        return(won)
+    if zeroes == []:
+        num_mines_left = mines_left(n,user_board)
+        elapsed_time = time.time() - start_time
+        elapsed_time = sec_to_ms(elapsed_time)
+        print(('+' + '-' * (8 + len(str(elapsed_time)))) + '+' + ' ' * ((4 * len(user_board[0])) - 16 - len(str(elapsed_time)) - len(str(num_mines_left))) + '+' + '-' * (9 + len(str(num_mines_left))) + '+') 
+        print('| Time: ' + str(elapsed_time) + ' |'+' ' * ((4 * len(user_board[0])) - 16 - len(str(elapsed_time)) - len(str(num_mines_left))) + '| Mines: ' + str(num_mines_left) + ' |')
+        print(('+' + '-' * (8 + len(str(elapsed_time)))) + '+' + ' ' * ((4 * len(user_board[0])) - 16 - len(str(elapsed_time)) - len(str(num_mines_left))) + '+' + '-' * (9 + len(str(num_mines_left))) + '+') 
+        #print('\n')
+        user_view(gameboard)
+        coordinate = check_coordinates()
+        x,y,mark = (int(coordinate[0]) - 1 ,int(coordinate[1]) - 1,coordinate[2])
+        u = uncover_board(user_board,x,y,mark,start_time,won)
+        return(won)
+    else:
+        x = zeroes[0][1]
+        y = zeroes[0][0]
+        u = uncover_board(user_board,x,y,mark,start_time,won)
+        return(True)
+def game():
+    won = False
+    #if first == True:
+    global g
+    g = create_board(width, height, '.')
+    bury_mines(g,n)
+    global completed_board
+    completed_board = copy.deepcopy(g)
+    global zeroes
+    zeroes = []
+    global previous_zeroes
+    previous_zeroes = []      
+    global user_board
+    user_board = create_board(width,height,' ')
+    print('\n'*2)
+    print_board(completed_board)
+    user_view(user_board)
+    mines_left(n,user_board)
+    start_time = time.time()
+    coordinate = check_coordinates()
+    print('\n')
+    x,y,mark = (int(coordinate[0]) - 1 ,int(coordinate[1]) - 1,coordinate[2])
+    uncover_board(user_board,x,y,mark,start_time,won)
+    elapsed_time = time.time() - start_time
+    elapsed_time = sec_to_ms(elapsed_time)  
+    print(('+' + '-' * (8 + len(str(elapsed_time)))) + '+')
+    print('| Time: ' + str(elapsed_time) + ' |')
+    print(('+' + '-' * (8 + len(str(elapsed_time)))) + '+')
+          
+def check_won(gameboard, n):
+    counter = 0
+    flag_counter = 0
+    for i in range(len(user_board)):
+        for j in range(len(user_board[i])):
+            if user_board[i][j] == '▶' and completed_board[i][j] == -1:
+                counter += 1
+                flag_counter += 1
+            if user_board[i][j] == ' ':
+                counter += 1
+    if counter == n or flag_counter == n:
+        return(True)
+    else:
+        return(False)
+
+def mines_left(n,gameboard):
+    counter = 0
+    for i in range(len(gameboard)):
+        for j in range(len(gameboard[i])):
+            if gameboard[i][j] == '▶':
+                counter += 1
+    return(n - counter)
+
+def sec_to_ms(time):
+    time = time // .001 * .001
+    return(time)
+
+def display_board(width,height,canvas):
+    canvas.delete('all')
+    for i in range(0,width):
+        for j in range(0,height):
+            if user_board[j][i] == ' ':
+                canvas.create_rectangle(i*30,j*30,(i+1)*30,(j+1)*30,fill='grey')
+                canvas.create_text(i*30 + 10 ,j*30 + 15, font='arial 10',text = str(user_board[j][i]))
+            elif user_board[j][i] == 'change':
+                canvas.create_rectangle(i*30,j*30,(i+1)*30,(j+1)*30,fill='red')
+            elif user_board[j][i] == '▶':
+                canvas.create_rectangle(i*30,j*30,(i+1)*30,(j+1)*30,fill='yellow')
+                canvas.create_text(i*30 + 10 ,j*30 + 15, font='arial 10',text = str(user_board[j][i]))
+            elif user_board[j][i] == 0:
+                canvas.create_rectangle(i*30,j*30,(i+1)*30,(j+1)*30)
+            elif user_board[j][i] > 0:
+                canvas.create_rectangle(i*30,j*30,(i+1)*30,(j+1)*30,fill='lightgrey')
+                canvas.create_text(i*30 + 10 ,j*30 + 15, font='arial 10',text = str(user_board[j][i]))
+    #for i in range(len(user_board)):
+       # for j in range(len(user_board[i])):
+            
+def lost(canvas):
+    canvas.create_rectangle(0,0,width ** 2 * 30, height ** 2 * 30)
+    canvas.create_text(100,10,fill="darkblue",font="Times 20 italic bold", text="Click the bubbles that are multiples of two.")
+  
+def show_finished_board(width,height,canvas):
+                canvas.delete('all')
+                for i in range(0,width):
+                    for j in range(0,height):
+                        if completed_board[j][i] == ' ':
+                            canvas.create_rectangle(i*30,j*30,(i+1)*30,(j+1)*30,fill='grey')
+                            canvas.create_text(i*30 + 10 ,j*30 + 15, font='arial 10',text = str(completed_board[j][i]))
+                        elif completed_board[j][i] == -1:
+                            canvas.create_rectangle(i*30,j*30,(i+1)*30,(j+1)*30,fill='yellow')
+                            canvas.create_text(i*30 + 10 ,j*30 + 15, font='arial 10',text = str(completed_board[j][i]))
+                        elif completed_board[j][i] == 0:
+                            canvas.create_rectangle(i*30,j*30,(i+1)*30,(j+1)*30)
+                        elif completed_board[j][i] > 0:
+                            canvas.create_rectangle(i*30,j*30,(i+1)*30,(j+1)*30,fill='lightgrey')
+                            canvas.create_text(i*30 + 10 ,j*30 + 15, font='arial 10',text = str(completed_board[j][i]))
+    
+def run(width,height,n,start_time): 
+    global game_running
+    game_running = [True]
+    first_move = [True]
+    def update_clock():                
+        timer['text'] = 'Time: '+ str(int(time.time() - start_time))
+        if game_running[0]: 
+            root.after(500,update_clock)
+    if game_running[0]:
+        root.after(500,update_clock)
+        root.after(500) 
+    
+    global g
+    g = create_board(width, height, '.')
+    bury_mines(g,n)
+    global completed_board
+    completed_board = copy.deepcopy(g)
+    print_board(completed_board)
+    zeroes = []
+    previous_zeroes = []      
+    global user_board
+    user_board = create_board(width,height,' ')
+    display_board(width,height,canvas) 
+    def handle_click(event):
+        if zeroes == []:
+            global x
+            global y
+            x = event.x // 30
+            y = event.y // 30
+        if completed_board[y][x] == -1:
+            timer['text'] = 'Time: '+ str(int(time.time() - start_time))
+            game_running[0] = False
+            canvas.unbind('<Button-1>')
+            canvas.unbind('<Button-3>')
+            show_finished_board(width,height,canvas)
+            #canvas.bind('<f>',show_finished_board(width,height,canvas))
+            a.pack()
+            #t = canvas.create_text(100,10,fill="red",font="Times 20 italic bold", text="Click the bubbles that are multiples of two.")
+
+                
+        if completed_board[y][x] >= 1:
+            user_board[y][x] = completed_board[y][x]
+        elif completed_board[y][x] == 0:
+            if zeroes != []:
+                zeroes.remove(zeroes[0])
+            user_board[y][x] = completed_board[y][x]
+            if y > 0 and completed_board[y-1][x] != -1 and user_board[y-1][x] != '▶':
+                user_board[y-1][x] = completed_board[y-1][x]
+                if completed_board[y-1][x] == 0:
+                    zeroes.append((y-1,x))
+            if y < height - 1 and completed_board[y+1][x] != -1 and user_board[y+1][x] != '▶':
+                user_board[y+1][x] = completed_board[y+1][x]
+                if completed_board[y+1][x] == 0:
+                    zeroes.append((y+1,x))
+            if x > 0 and completed_board[y][x-1] != -1 and user_board[y][x-1] != '▶':
+                user_board[y][x-1] = completed_board[y][x-1]
+                if completed_board[y][x-1] == 0:
+                    zeroes.append((y,x-1))
+            if x < width - 1 and completed_board[y][x+1] != -1 and user_board[y][x+1] != '▶':
+                user_board[y][x+1] = completed_board[y][x+1]
+                if completed_board[y][x+1] == 0:
+                    zeroes.append((y,x+1))
+            if y > 0 and x > 0 and completed_board[y-1][x-1] != -1 and user_board[y-1][x-1] != '▶':
+                user_board[y-1][x-1] = completed_board[y-1][x-1]
+                if completed_board[y-1][x-1] == 0:
+                    zeroes.append((y-1,x-1))
+            if x < width - 1 and y > 0 and completed_board[y-1][x+1] != -1 and user_board[y-1][x+1] != '▶':
+                user_board[y-1][x+1] = completed_board[y-1][x+1]
+                if completed_board[y-1][x+1] == 0:
+                    zeroes.append((y-1,x+1))
+            if y < height - 1 and x > 0 and completed_board[y+1][x-1] != -1 and user_board[y+1][x-1] != '▶':
+                user_board[y+1][x-1] = completed_board[y+1][x-1]
+                if completed_board[y+1][x-1] == 0:
+                    zeroes.append((y+1,x-1))
+            if y < height - 1 and x < width - 1 and completed_board[y+1][x+1] != -1 and user_board[y+1][x+1] != '▶':
+                user_board[y+1][x+1]  = completed_board[y+1][x+1]
+                if completed_board[y+1][x+1] == 0:
+                    zeroes.append((y+1,x+1))
+            for i in previous_zeroes:
+                for j in zeroes:  
+                    if i == j:
+                        zeroes.remove(j)   
+        if zeroes != []:
+            x = zeroes[0][1]
+            y = zeroes[0][0]
+            previous_zeroes.append(zeroes[0])
+            handle_click(event)
+        if check_won(user_board,n) == True:
+            elapsed_time = int(time.time() - start_time)
+            change_leaderboard(width,height,n,elapsed_time)
+            timer['text'] = 'Time: '+ str(int(time.time() - start_time))
+            game_running[0] = False
+            canvas.unbind('<Button-1>')
+            canvas.unbind('<Button-3>')
+            a = canvas.create_rectangle(0,0,width * 30, height * 30, fill = 'darkgreen')
+            canvas.create_oval(width * 30 // 2 - 130, height * 30 // 2 + 50, width * 30 // 2 + 130, height * 30 // 2 - 50, fill = 'yellow')
+            canvas.create_text(width * 30 // 2,height * 30 // 2, text = 'You Win', font = 'arial 40')
+            a.pack()
+        first_move[0] = False
+        display_board(width,height,canvas) 
+    def handle_right_click(event):
+        x = event.x // 30
+        y = event.y // 30
+        if check_won == True:
+            canvas.unbind('<Button-3>')
+        elif user_board[y][x] == '▶':
+            user_board[y][x] = ' '
+            mine_counter['text'] = 'Mines: ' + str(mines_left(n,user_board))
+        elif user_board[y][x] == ' ' and mines_left(n,user_board) > 0:
+            user_board[y][x] = '▶'
+            mine_counter['text'] = 'Mines: ' + str(mines_left(n,user_board))
+        display_board(width,height,canvas)
+    def handle_scroll_hold(event):
+        x = event.x // 30
+        y = event.y // 30
+        for i in range(len(user_board)):
+            for j in range(len(user_board[0])):
+                if user_board[i][j] == 'change':
+                    user_board[i][j] = ' '
+        display_board(width,height,canvas)
+        if user_board[y][x] == ' ':
+            user_board[y][x] = 'change'
+        if y > 0 and user_board[y-1][x] == ' ':
+            user_board[y-1][x] = 'change'
+        if y < height - 1 and user_board[y+1][x] == ' ':
+            user_board[y+1][x] = 'change'
+        if x > 0 and user_board[y][x-1] == ' ':
+            user_board[y][x-1] = 'change'
+        if x < width - 1 and user_board[y][x+1] == ' ':
+            user_board[y][x+1] = 'change'
+        if y > 0 and x > 0 and user_board[y-1][x-1] == ' ':
+            user_board[y-1][x-1] = 'change'
+        if x < width - 1 and y > 0 and user_board[y-1][x+1] == ' ':
+            user_board[y-1][x+1] = 'change'
+        if y < height - 1 and x > 0 and user_board[y+1][x-1] == ' ':
+            user_board[y+1][x-1] = 'change'
+        if y < height - 1 and x < width - 1 and user_board[y+1][x+1] == ' ':
+            user_board[y+1][x+1] = 'change'
+        display_board(width,height,canvas)
+    def handle_scroll_release(event):
+        for i in range(len(user_board)):
+            for j in range(len(user_board[0])):
+                if user_board[i][j] == 'change':
+                    user_board[i][j] = ' '
+        display_board(width,height,canvas)
+    canvas.bind('<Button-1>',handle_click)
+    canvas.bind('<Button-3>',handle_right_click)
+    canvas.bind('<Control-Button-1>',handle_scroll_hold)
+    canvas.bind('<Control-Button1-Motion>',handle_scroll_hold)
+    canvas.bind('<Control-ButtonRelease-1>',handle_scroll_release)
+
+def beginner():
+    canvas.delete('all')
+    game_running[0] = False
+    width = 9
+    height = 9
+    n = 10
+    mine_counter['text'] = 'Mines: '+str(n)
+    heightpxls = height * 30
+    widthpxls = width * 30      
+    root.geometry(str(widthpxls) + 'x' + str(heightpxls + 40))
+    canvas.config(width = widthpxls * 30, height = heightpxls * 30)
+    start_time = time.time()
+    run(width,height,n,start_time)
+    
+def intermediate():
+    canvas.delete('all')
+    game_running[0] = False
+    width = 16
+    height = 16
+    n = 40
+    heightpxls = height * 30
+    widthpxls = width * 30      
+    mine_counter['text'] = 'Mines: ' +str(n)
+    root.geometry(str(widthpxls) + 'x' + str(heightpxls + 40))
+    canvas.config(width = widthpxls * 30, height = heightpxls * 30)
+    start_time = time.time()
+    run(width,height,n,start_time)
+    
+def expert():
+    canvas.delete('all')
+    game_running[0] = False
+    width = 30
+    height = 16
+    n = 99
+    heightpxls = height * 30
+    widthpxls = width * 30      
+    mine_counter['text'] = 'Mines: '+str(n)
+    root.geometry(str(widthpxls) + 'x' + str(heightpxls + 40))
+    canvas.config(width = widthpxls * 30, height = heightpxls * 30)
+    start_time = time.time()
+    run(width,height,n,start_time)
+
+def custom():
+    customizer = Tk()
+    customizer.wm_title('Customizing')
+    customizer.geometry('250x125')
+    
+    Label(customizer, text="Width").grid(row=0)
+    Label(customizer, text="Height").grid(row=1)
+    Label(customizer, text="Number of Mines").grid(row=2)
+    
+    e1 = Entry(customizer)
+    e2 = Entry(customizer)
+    e3 = Entry(customizer)
+    e1.grid(row=0, column=1)
+    e2.grid(row=1, column=1)
+    e3.grid(row=2, column=1)
+    
+    def entering_dimensions():
+        for i in range(len(e1.get())):
+            if e1.get()[i] not in '1234567890':
+                customizer.destroy()
+                custom()
+        for i in range(len(e2.get())):
+            if e2.get()[i] not in '1234567890':
+                customizer.destroy()
+                custom()
+        for i in range(len(e3.get())):
+            if e3.get()[i] not in '1234567890':
+                customizer.destroy()
+                custom()
+        width = int(e1.get())
+        height = int(e2.get())
+        n = int(e3.get())
+        heightpxls = height * 30
+        widthpxls = width * 30   
+        mine_counter['text'] = 'Mines: '+str(n)
+        root.geometry(str(widthpxls) + 'x' + str(heightpxls + 40))
+        canvas.config(width = widthpxls * 30, height = heightpxls * 30)
+        start_time = time.time()
+        customizer.destroy()
+        run(width,height,n,start_time)
+    quit_customizer = Button(master= customizer, text = 'Quit', command = customizer.destroy)
+    quit_customizer.grid(row=3, column=0)
+    enter_customizer = Button(master= customizer, text = 'Enter', command = entering_dimensions)
+    enter_customizer.grid(row = 3, column = 1)
+    customizer.mainloop()
+
+def how_to_play():
+    instruction = Tk()
+    instruction.wm_title('How to Play')
+    instruction.geometry('500x450')
+    labels = Label(instruction, font = 'arial 20', bg = 'lightgrey', fg = 'black', width = 420, height = 380, text = 'Left Click to uncover mines\nRight Click to flag a square\n\nCtrl-B to play a beginner board\nCtrl-I to play a intermediate board\nCtrl-E to play an expert game\n\n Hold and/or drag Ctrl+Left Click to reveal \nadjacent squares around cursor\n\nCheck the leaderboard to compare your \ntimes with other people and with yourself\n\nUncover all the squares to win!')
+    labels.pack(side = TOP)
+    buttons = Button(instruction, text = 'quit', command = instruction.destroy)
+    buttons.pack(side = TOP)
+    instruction.mainloop()
+def destroy(event):
+    root.destroy()
+
+def leaderboard():
+    leaderboards = Tk()
+    leaderboards.wm_title('Leaderboards')
+    leaderboards.geometry('250x250')
+    read_file = open('Beginner.txt','r')
+    read_file_2 = open('Intermediate.txt','r')
+    read_file_3 = open('Expert.txt', 'r')
+    Label(leaderboards, text = 'Leaderboards',font=('Comic Sans MS', 12, 'bold italic')).grid(row = 0, columnspan=6,sticky=W+E+N+S, padx=5, pady=5)
+    Label(leaderboards, text = 'Beginner').grid(row = 1, column = 0, columnspan=2,sticky=W+E+N+S, padx=5, pady=5)
+    Label(leaderboards, text = 'Intermediate').grid(row = 1, column = 2, columnspan=2,sticky=W+E+N+S, padx=5, pady=5)
+    Label(leaderboards, text = 'Expert').grid(row = 1, column = 4, columnspan=2,sticky=W+E+N+S, padx=5, pady=5)
+    counter = 0 
+    for line in read_file:
+        Label(leaderboards,text = line.strip()).grid(row = counter // 2 + 2, column = counter % 2)
+        counter += 1
+    counter = 0
+    for line in read_file_2:
+        Label(leaderboards,text = line.strip()).grid(row = counter // 2 + 2, column = counter % 2 + 2)
+        counter += 1
+    counter = 0
+    for line in read_file_3:
+        Label(leaderboards,text = line.strip()).grid(row = counter // 2 + 2, column = counter % 2 + 4)
+        counter += 1
+    read_file.close()
+    read_file_2.close()
+    read_file_3.close()
+    leaderboards.mainloop()
+
+def change_leaderboard(width,height,n,elapsed_time):
+    if width == 9 and height == 9 and n == 10:
+        read_file = open('Beginner.txt','r')
+    elif width == 16 and height == 16 and n == 40:
+        read_file = open('Intermediate.txt', 'r')
+    elif width == 30 and height == 16 and n == 99:
+        read_file = open('Expert.txt', 'r')
+    else:
+        return
+    counter = 0
+    li = []
+    continue_loop = True
+    for line in read_file:
+        if counter % 2 == 1:
+            li.append(int(line))
+        else:
+            li.append(str(line.split()[0]))
+        counter += 1
+    for i in range(len(li)):
+        if i % 2 == 1 and elapsed_time < li[i] and continue_loop:
+            if i == 3:
+                li[4] = li[2]
+                li[5] = li[3]
+                counter = 3
+            elif i == 1:
+                li[4] = li[2]
+                li[5] = li[3]
+                li[2] = li[0]
+                li[3] = li[1]
+                counter = 1
+            else:
+                counter = 5
+            li[i] = elapsed_time
+            continue_loop = False
+    ask_name = Tk()
+    ask_name.wm_title('Input name')
+    ask_name.geometry('400x400')
+    Label(master = ask_name, text = 'Name: ').grid(row = 0, column = 0)
+    e1 = Entry(master = ask_name)
+    e1.grid(row = 0, column = 1)
+    def getting_name():
+        name = e1.get()
+        li[counter - 1] = name
+        if width == 9 and height == 9 and n == 10:
+            write_file = open('Beginner.txt','w')
+        elif width == 16 and height == 16 and n == 40:
+            write_file = open('Intermediate.txt', 'w')
+        elif width == 30 and height == 16 and n == 99:
+            write_file = open('Expert.txt', 'w')
+        for i in range(len(li)):
+            print(li[i],file = write_file)
+        write_file.close()
+        read_file.close()
+        ask_name.destroy()
+    enter = Button(master= ask_name, text = 'Enter', command = getting_name)
+    enter.grid(row = 1, column = 0, rowspan = 2, sticky=N+S+E+W)
+        
+        
+ 
+        
+        
+import random  
+import copy
+import time
+from tkinter import *
+root = Tk()
+root.wm_title("Minesweeper")
+height = 16
+width = 30
+n = 99
+heightpxls = height * 30
+widthpxls = width * 30
+frame = Frame(master = root, width = widthpxls, height = 40)
+frame.pack(side = TOP)
+menubar = Menu(root)
+filemenu = Menu(menubar, tearoff=0)
+filemenu.add_separator()
+filemenu.add_command(label="Beginner",accelerator = "Ctrl+B", command=beginner)
+filemenu.add_command(label="Intermediate",accelerator = "Ctrl+I", command=intermediate)
+filemenu.add_command(label="Expert",accelerator = "Ctrl+E", command=expert)
+filemenu.add_command(label="Custom",accelerator = 'Ctrl+C', command=custom)
+filemenu.add_separator()
+filemenu.add_command(label='Leaderboards',accelerator = 'Ctrl+L', command = leaderboard)
+filemenu.add_separator()
+filemenu.add_command(label='Quit',accelerator = 'Ctrl+Q', command = root.destroy)
+menubar.add_cascade(label="File", menu=filemenu)
+howmenu = Menu(menubar, tearoff=0)
+howmenu.add_command(label="How to Play", command=how_to_play)
+menubar.add_cascade(label="Instructions", menu=howmenu)
+root.config(menu = menubar)
+start_time = time.time()
+timer = Label(master=frame, text=('Time: ' + str(time.time() - start_time)), font=("Times",20),bg = 'red', fg = 'white') # need to specify the parent
+timer.pack(side = LEFT,anchor = 'w', fill = BOTH) # add the label into the root window
+mine_counter = Label(master = frame, text = str(n), font = ('Times', 20),bg = 'yellow')
+mine_counter['text'] = 'Mines: ' + str(n)
+mine_counter.pack(side = LEFT, anchor = 'e', fill = BOTH)
+
+root.bind('<Control-b>', lambda event: beginner())
+root.bind('<Control-i>', lambda event: intermediate())
+root.bind('<Control-e>', lambda event: expert())
+root.bind('<Control-c>', lambda event: custom())
+root.bind('<Control-l>', lambda event: leaderboard())
+root.bind('<Control-q>', destroy)
+
+root.geometry(str(widthpxls) + 'x' + str(heightpxls + 40))
+
+canvas = Canvas(master=root, height=heightpxls, width = widthpxls)
+canvas.pack(side = TOP)
+run(width,height,n,start_time)
+root.mainloop()
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
