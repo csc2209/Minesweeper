@@ -332,7 +332,9 @@ def run(width,height,n,start_time):
             global y
             x = event.x // 30
             y = event.y // 30
-        if completed_board[y][x] == -1:
+        if user_board[y][x] == '▶':
+            return
+        elif completed_board[y][x] == -1:
             timer['text'] = 'Time: '+ str(int(time.time() - start_time))
             game_running[0] = False
             canvas.unbind('<Button-1>')
@@ -640,7 +642,19 @@ def change_leaderboard(width,height,n,elapsed_time):
     enter.grid(row = 1, column = 0, rowspan = 2, sticky=N+S+E+W)
         
         
- 
+def new_game():
+    game_running[0]= False
+    start_time = time.time()
+    width = canvas.winfo_width() // 30
+    height = canvas.winfo_height() // 30
+    n = 0
+    for i in range(len(g)):
+        for j in range(len(g[i])):
+            if g[i][j] == '*':
+                n += 1
+    mine_counter['text'] = 'Mines: '+str(n)
+    canvas.delete('all')
+    run(width,height,n,start_time)
         
         
 import random  
@@ -673,9 +687,11 @@ howmenu.add_command(label="How to Play", command=how_to_play)
 menubar.add_cascade(label="Instructions", menu=howmenu)
 root.config(menu = menubar)
 start_time = time.time()
-timer = Label(master=frame, text=('Time: ' + str(time.time() - start_time)), font=("Times",20),bg = 'red', fg = 'white') # need to specify the parent
+timer = Label(master=frame, text=('Time: ' + str(time.time() - start_time)), font=("Times",15),bg = 'red', fg = 'white') # need to specify the parent
 timer.pack(side = LEFT,anchor = 'w', fill = BOTH) # add the label into the root window
-mine_counter = Label(master = frame, text = str(n), font = ('Times', 20),bg = 'yellow')
+new_game_button = Button(master = frame, text = ('New game'), font = ('Times',15), command = new_game)
+new_game_button.pack(side = LEFT, anchor = 'w', fill = BOTH)
+mine_counter = Label(master = frame, text = str(n), font = ('Times', 15),bg = 'yellow')
 mine_counter['text'] = 'Mines: ' + str(n)
 mine_counter.pack(side = LEFT, anchor = 'e', fill = BOTH)
 
